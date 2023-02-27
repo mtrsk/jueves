@@ -5,8 +5,7 @@ open System
 [<RequireQualifiedAccess>]
 module Time =
     let isMonday(date: DateTimeOffset) =
-        //date.DayOfWeek = DayOfWeek.Monday
-        true
+        date.DayOfWeek = DayOfWeek.Monday
 
     let isTuesday(date: DateTimeOffset) =
         date.DayOfWeek = DayOfWeek.Tuesday
