@@ -16,19 +16,25 @@ module Runner =
             |]
         if result then
             mailbox.Post(FromTelegram { Context = ctx; Command = Command.Message })
+ 
+    let checkDatabaseChats (config: Funogram.Types.BotConfig) (c: Database.Chat) =
+        let last = c.LastUpdate.ToUniversalTime().Date
+        let date = Time.toDateTimeWithOffset last c.TimeZone
+        let next = Time.nextWeekday date
+        let now = Time.toDateTimeWithOffset DateTimeOffset.UtcNow.DateTime c.TimeZone
+        if Time.isMonday(date) && (now >= next) then
+            mailbox.Post(FromBackground { BotConfig = config; Operation = PostMonday; Destination = c } )
+        if Time.isTuesday(date) && (now >= next) then
+            mailbox.Post(FromBackground { BotConfig = config; Operation = PostTuesday; Destination = c } )
+        if Time.isThursday(date) && (now >= next) then
+            mailbox.Post(FromBackground { BotConfig = config; Operation = PostThursday; Destination = c } )
 
     let backgroundJob botConfig =
         let config = botConfig
         async {
             while true do
-                let now = DateTimeOffset.UtcNow
-                let destination = 1L
-                if Time.isMonday(now) then
-                    mailbox.Post(FromBackground { BotConfig = config; Operation = PostMonday; Destination = destination } )
-                if Time.isTuesday(now) then
-                    mailbox.Post(FromBackground { BotConfig = config; Operation = PostTuesday; Destination = destination } )
-                if Time.isThursday(now) then
-                    mailbox.Post(FromBackground { BotConfig = config; Operation = PostThursday; Destination = destination } )
-                do! Task.Delay(TimeSpan.FromSeconds(60.0)) |> Async.AwaitTask
+                let chats = Database.SQLite.readAll()
+                let _ = List.map (checkDatabaseChats config) chats
+                do! Task.Delay(TimeSpan.FromSeconds(10.0)) |> Async.AwaitTask
         }
         |> Async.Start

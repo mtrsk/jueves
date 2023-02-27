@@ -11,13 +11,7 @@ open Database
 open Funogram.Types
 
 module Mailbox =
-    let sendMessage (ctx: UpdateContext) chatId message =
-        Api.sendMessage chatId message
-        |> api ctx.Config
-        |> Async.Ignore
-        |> Async.Start
-        
-    let send (config: Funogram.Types.BotConfig) chatId message =
+    let sendMessage (config: Funogram.Types.BotConfig) chatId message =
         Api.sendMessage chatId message
         |> api config
         |> Async.Ignore
@@ -26,10 +20,11 @@ module Mailbox =
     let handleCommand (ctx: UpdateContext) (cmd: Command) (chat: Funogram.Telegram.Types.Chat) =
         match cmd with
         | Command.Register ->
-            let newChat = { Id = chat.Id; TimeZone = "utc" }
+            let timezone = -3
+            let newChat = { Id = chat.Id; TimeZone = timezone; LastUpdate = DateTimeOffset.UtcNow }
             SQLite.insert newChat
-            sendMessage ctx chat.Id "Chat successfully registered"
-        | Command.Message -> sendMessage ctx chat.Id "Got a message"
+            sendMessage ctx.Config chat.Id $"Chat '{chat.Title}' successfully registered!"
+        | Command.Message -> sendMessage ctx.Config chat.Id "Got a message"
 
     let pickRandomItem (data: 'T list) =
         // TODO: Find a better way to do this in F#
@@ -38,14 +33,14 @@ module Mailbox =
         |> List.sortBy (fun _ -> rnd.Next())
         |> List.head
 
-    let handleBackgroundTasks config (operation: Background) destination =
+    let handleBackgroundTasks config (operation: Background) (destination: Database.Chat) =
         match operation with
         | PostMonday ->
             let videos =
                 [ "https://www.youtube.com/watch?v=1_oHK2fzGe8"
                   "https://www.youtube.com/watch?v=WrulZzDYM6s" ]
             let msg = pickRandomItem videos
-            send config destination msg
+            sendMessage config destination.Id msg
         | PostTuesday -> ()
         | PostThursday ->
             let videos =
@@ -53,8 +48,8 @@ module Mailbox =
                   "https://www.youtube.com/watch?v=YE4IvymZQPY"
                   "https://www.youtube.com/watch?v=LIOFdT6TC_w" ]
             let msg = pickRandomItem videos
-            send config destination msg
-            
+            sendMessage config destination.Id msg
+
     let parseMailboxMessage (envelop: Envelop) =
         match envelop with
         | FromTelegram { Context = ctx; Command = cmd } ->

@@ -12,7 +12,7 @@ type TelegramEvent =
 type BackgroundEvent =
     { BotConfig: Funogram.Types.BotConfig
       Operation: Background
-      Destination: int64 }
+      Destination: Database.Chat }
  
 type Envelop =
     | FromTelegram of TelegramEvent
