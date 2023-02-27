@@ -7,7 +7,7 @@ type TelegramToken = string
 [<Convention("TELEGRAM")>]
 type TelegramSettings =
     { BotToken: TelegramToken }
-    
+
 type ApplicationSettings =
     { Telegram: TelegramSettings }
     static member getSettings () =

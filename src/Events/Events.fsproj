@@ -6,8 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Domain.fs" />
+        <Compile Include="Time.fs" />
         <Compile Include="Mailbox.fs" />
-        <Compile Include="Telegram.fs" />
+        <Compile Include="Process.fs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -15,6 +17,10 @@
         <PackageReference Include="Funogram" Version="2.0.5" />
         <PackageReference Include="Funogram.Telegram" Version="6.4.0.1" />
         <PackageReference Update="FSharp.Core" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Database\Database.fsproj" />
     </ItemGroup>
 
 </Project>

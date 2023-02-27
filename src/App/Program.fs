@@ -1,11 +1,9 @@
-﻿open System
-open System.Threading.Tasks
-
-open FsConfig
+﻿open FsConfig
 open Funogram.Api
 open Funogram.Telegram
 open Funogram.Telegram.Bot
 
+open Database
 open Domain
 open Events
 
@@ -14,8 +12,10 @@ let main argv =
     let settings = ApplicationSettings.getSettings()
     async {
         let config = { Config.defaultConfig with Token = settings.Telegram.BotToken }
+        SQLite.createTables()
         let! _ = Api.deleteWebhookBase () |> api config
-        return! startBot config Chats.updateArrived None
+        let _ = Runner.backgroundJob config
+        return! startBot config Runner.updateArrived None
     }
     |> Async.RunSynchronously
     0
