@@ -3,8 +3,8 @@ open Funogram.Api
 open Funogram.Telegram
 open Funogram.Telegram.Bot
 
+open Configuration
 open Database
-open Domain
 open Events
 
 [<EntryPoint>]

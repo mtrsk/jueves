@@ -1,6 +1,9 @@
-namespace Domain
+﻿namespace Configuration
 
 open FsConfig
+open Serilog
+open Serilog.Core
+open Serilog.Sinks.SystemConsole.Themes
 
 type TelegramToken = string
 
@@ -9,7 +12,7 @@ type TelegramSettings =
     { BotToken: TelegramToken }
 
 type ApplicationSettings =
-    { Telegram: TelegramSettings }
+    { Telegram: TelegramSettings; Logger: Logger }
     static member getSettings () =
         let telegram =
             match EnvConfig.Get<TelegramSettings>() with
@@ -21,4 +24,15 @@ type ApplicationSettings =
                 | BadValue (envVarName, value) ->
                     failwithf $"Environment variable {envVarName} has invalid value {value}"
                 | NotSupported msg -> failwith msg
-        { Telegram = telegram }
+        let logger =
+            LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console(
+                    theme = AnsiConsoleTheme.Code,
+                    outputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread <{ThreadId}>][{ThreadName}] {Message:lj}{NewLine}{Exception}")
+                .Enrich.FromLogContext()
+                .Enrich.WithThreadId()
+                .Enrich.WithThreadName()
+                .CreateLogger()
+
+        { Telegram = telegram; Logger = logger }
