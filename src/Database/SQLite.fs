@@ -42,10 +42,18 @@ module SQLite =
         try
             use conn = createConnection connectionString
             conn.Open()
-            let insertCommand = "INSERT INTO Chat (Id, Timezone) VALUES (@id, @timezone);"
+            let insertCommand =
+                """
+                INSERT INTO Chat (Id, Timezone, LastMonday, LastTuesday, LastThursday)
+                VALUES (@id, @timezone, @monday, @tuesday, @thursday);
+                """
             use insert = new SqliteCommand(insertCommand, conn)
+            let now = DateTimeOffset.UtcNow.AddDays(-7)
             insert.Parameters.AddWithValue("@id", chat.Id) |> ignore
             insert.Parameters.AddWithValue("@timezone", chat.TimeZone) |> ignore
+            insert.Parameters.AddWithValue("@monday", now) |> ignore
+            insert.Parameters.AddWithValue("@tuesday", now) |> ignore
+            insert.Parameters.AddWithValue("@thursday", now) |> ignore
             let result = insert.ExecuteNonQuery()
             if result >= 1 then
                 ()

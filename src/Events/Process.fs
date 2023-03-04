@@ -27,6 +27,7 @@ module Runner =
         let next = Time.nextWeekday date
         let now = Time.toDateTimeWithOffset DateTimeOffset.UtcNow.DateTime t
         f date && (now >= next)
+
     let checkDatabaseChats (config: Funogram.Types.BotConfig) (c: Database.Chat) =
         let updates = c.LastUpdates
         if checkDates updates.Monday c.TimeZone Time.isMonday then
@@ -39,10 +40,11 @@ module Runner =
     let backgroundJob botConfig =
         log.Information("Starting background jobs...")
         let config = botConfig
+        let interval = TimeSpan.FromMinutes(5)
         async {
             while true do
                 let chats = Database.SQLite.readAll()
                 let _ = List.map (checkDatabaseChats config) chats
-                do! Task.Delay(TimeSpan.FromSeconds(10.0)) |> Async.AwaitTask
+                do! Task.Delay(interval) |> Async.AwaitTask
         }
         |> Async.Start
