@@ -14,12 +14,15 @@ clean:
 backup:
 	echo "TODO"
 
-migrate:
-	echo "TODO"
+bootstrap:
+	./bootstrap.sh
 
 build:
 	dotnet build
 	dotnet run --project src/App/App.fsproj
+
+docker:
+	docker-compose build
 
 run:
 	docker compose up

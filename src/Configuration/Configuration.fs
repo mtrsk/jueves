@@ -1,4 +1,4 @@
-﻿namespace Configuration
+﻿namespace Bot.Configuration
 
 open FsConfig
 open Serilog
@@ -36,3 +36,8 @@ type ApplicationSettings =
                 .CreateLogger()
 
         { Telegram = telegram; Logger = logger }
+
+[<RequireQualifiedAccess>]
+module Settings =
+    let settings = ApplicationSettings.getSettings()
+    let log = settings.Logger

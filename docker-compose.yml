@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    environment:
+      - TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+    volumes:
+      - ./src/Database/data.db:/app/src/Database/data.db
+

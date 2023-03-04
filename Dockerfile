@@ -14,6 +14,8 @@ WORKDIR /app
 COPY ./src /app/src
 COPY jueves.sln Makefile ./
 
+RUN make bootstrap
+
 # ----------------
 # Publishing Image
 # ----------------
@@ -25,7 +27,13 @@ RUN dotnet publish -c Release -o /app/publish
 # -------------
 FROM mcr.microsoft.com/dotnet/aspnet:$DOTNET_VERSION as runtime
 
+RUN apt-get update \
+    && apt-get install \
+        -y --no-install-recommends make sqlite3
+
+RUN make bootstrap
+
 COPY --from=publish /app/publish /app
 WORKDIR /app
-ENTRYPOINT ["sh", "-c"]
-CMD ["dotnet App.dll"]
+ENTRYPOINT [ "sh", "-c" ]
+CMD [ "dotnet App.dll" ]
