@@ -1,5 +1,7 @@
 ENVIRONMENT ?= "development"
 
+SHELL = bash
+
 .SHELLARGS = -euo pipefail
 
 # Include extra environment variables

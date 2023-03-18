@@ -7,14 +7,15 @@ FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION as build
 # Install tools
 RUN apt-get update \
     && apt-get install \
-        -y --no-install-recommends make sqlite3
+        -y --no-install-recommends sqlite3
 
 # Setup build directory & copy source code
 WORKDIR /app
 COPY ./src /app/src
-COPY jueves.sln Makefile ./
+COPY jueves.sln bootstrap.sh ./
 
-RUN make bootstrap
+RUN chmod 700 bootstrap.sh
+RUN ./bootstrap.sh
 
 # ----------------
 # Publishing Image
@@ -29,11 +30,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:$DOTNET_VERSION as runtime
 
 RUN apt-get update \
     && apt-get install \
-        -y --no-install-recommends make sqlite3
-
-RUN make bootstrap
+        -y --no-install-recommends sqlite3
 
 COPY --from=publish /app/publish /app
 WORKDIR /app
-ENTRYPOINT [ "sh", "-c" ]
-CMD [ "dotnet App.dll" ]
+ENTRYPOINT [ "dotnet App.dll" ]
