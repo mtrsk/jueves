@@ -9,5 +9,5 @@ services:
     environment:
       - TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
     volumes:
-      - ./src/Database/data.db:/app/src/Database/data.db
+      - ./database/data.db:/app/database/data.db
 

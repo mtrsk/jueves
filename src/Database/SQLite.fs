@@ -1,6 +1,7 @@
 ﻿namespace Database
 
 open System
+open System.IO
 
 open Bot.Configuration
 
@@ -8,9 +9,13 @@ open Bot.Configuration
 module SQLite =
     open FSharp.Data.Sql
     open Microsoft.Data.Sqlite
-    
-    [<Literal>]
-    let connectionString = "Data Source=" + __SOURCE_DIRECTORY__ + @"/data.db;"
+
+    let getDatabase () =
+        let databasePath = __SOURCE_DIRECTORY__ + "/../../database"
+        Path.Combine(databasePath, "data.db")
+        |> Path.GetFullPath
+
+    let connectionString = "Data Source=" + getDatabase() + ";"
     let createConnection str = new SqliteConnection(str)
     let log = Settings.log
 
