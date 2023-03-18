@@ -36,11 +36,13 @@ module Runner =
             mailbox.Post(FromBackground { BotConfig = config; Operation = PostTuesday; Destination = c } )
         if checkDates updates.Thursday c.TimeZone Time.isThursday then
             mailbox.Post(FromBackground { BotConfig = config; Operation = PostThursday; Destination = c } )
+        if checkDates updates.Saturday c.TimeZone Time.isSaturday then
+            mailbox.Post(FromBackground { BotConfig = config; Operation = PostSaturday; Destination = c } )
 
     let backgroundJob botConfig =
         log.Information("Starting background jobs...")
         let config = botConfig
-        let interval = TimeSpan.FromMinutes(1)
+        let interval = TimeSpan.FromMinutes(5)
         async {
             while true do
                 let chats = Database.SQLite.readAll()
