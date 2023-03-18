@@ -5,9 +5,11 @@ open System
 type Updates =
     { Monday: DateTimeOffset
       Tuesday: DateTimeOffset
-      Thursday: DateTimeOffset }
+      Thursday: DateTimeOffset
+      Saturday: DateTimeOffset }
     static member init() =
-        { Monday = DateTimeOffset.UtcNow; Tuesday = DateTimeOffset.UtcNow; Thursday = DateTimeOffset.UtcNow }
+        let now = DateTimeOffset.UtcNow
+        { Monday = now; Tuesday = now; Thursday = now; Saturday = now }
 type Chat =
     { Id : int64
       TimeZone: int

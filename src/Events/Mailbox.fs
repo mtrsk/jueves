@@ -1,6 +1,7 @@
 namespace Events
 
 open System
+open System.IO
 
 open Funogram.Api
 open Funogram.Telegram
@@ -17,9 +18,16 @@ module Mailbox =
         log.Information("Sending MESSAGE={@Message} to CHAT={@Chat}", message, chatId)
         Api.sendMessage chatId message
         |> api config
-        |> Async.Ignore
-        |> Async.Start
-
+        |> Async.RunSynchronously
+ 
+    let sendAnimation (config: Funogram.Types.BotConfig) chatId (path: string) =
+        log.Information("Sending IMAGE={@Path} to CHAT={@Chat}", path, chatId)
+        use stream = new FileStream(path, FileMode.Open, FileAccess.Read)
+        let animation = InputFile.File(path, stream)
+        Api.sendAnimation chatId animation ""
+        |> api config
+        |> Async.RunSynchronously
+        
     let handleCommand (ctx: UpdateContext) (cmd: Command) (chat: Funogram.Telegram.Types.Chat) =
         match cmd with
         | Command.Register ->
@@ -35,34 +43,66 @@ module Mailbox =
                         $"Chat '{chat.Title}' successfully registered!"
                 | None -> defaultMessage
             SQLite.insert newChat
-            sendMessage ctx.Config chat.Id message
-        | Command.Message -> sendMessage ctx.Config chat.Id "Got a message"
+            let result = sendMessage ctx.Config chat.Id message
+            ()
+        | Command.Message ->
+            let result = sendMessage ctx.Config chat.Id "Got a message"
+            ()
 
     let pickRandomItem (data: 'T list) =
-        // TODO: Find a better way to do this in F#
+        // TODO: This is really dumb, find a better way to do this in F#
         let rnd = System.Random()
         data
         |> List.sortBy (fun _ -> rnd.Next())
         |> List.head
 
+    let fetchPicturesFromDirectory (source: string) =
+        let assetPath = __SOURCE_DIRECTORY__ + $"/../../assets/{source}"
+        Directory.GetFiles(assetPath, "*.gif")
+        |> Array.map (Path.GetFullPath)
+        |> List.ofArray
+ 
+    let sendGif config destination (day: string) =
+        let pictures = fetchPicturesFromDirectory (day.ToLower())
+        let msg = pickRandomItem pictures
+        SQLite.update destination day
+        match sendAnimation config destination.Id msg with
+        | Ok _ -> ()
+        | Error e -> log.Error(e.Description)
+
+    let sendVideo config destination (day: string) (videos: string list) =
+        let msg = pickRandomItem videos
+        SQLite.update destination day
+        match sendMessage config destination.Id msg with
+        | Ok _ -> ()
+        | Error e -> log.Error(e.Description)
+
     let handleBackgroundTasks config (operation: Background) (destination: Database.Chat) =
         match operation with
         | PostMonday ->
+            let day = "Monday"
             let videos =
                 [ "https://www.youtube.com/watch?v=1_oHK2fzGe8"
                   "https://www.youtube.com/watch?v=WrulZzDYM6s" ]
-            let msg = pickRandomItem videos
-            SQLite.update destination "Monday"
-            sendMessage config destination.Id msg
-        | PostTuesday -> ()
+            sendVideo config destination day videos
+        | PostTuesday ->
+            let day = "Tuesday"
+            sendGif config destination day
         | PostThursday ->
-            let videos =
-                [ "https://www.youtube.com/watch?v=R5bQrotNfok"
-                  "https://www.youtube.com/watch?v=YE4IvymZQPY"
-                  "https://www.youtube.com/watch?v=LIOFdT6TC_w" ]
-            let msg = pickRandomItem videos
-            SQLite.update destination "Thursday"
-            sendMessage config destination.Id msg
+            let day = "Thursday"
+            let event = [ PostAnimation; PostVideo; PostAnimation ] |> pickRandomItem
+            match event with
+            | PostVideo ->
+                let videos =
+                    [ "https://www.youtube.com/watch?v=R5bQrotNfok"
+                      "https://www.youtube.com/watch?v=YE4IvymZQPY"
+                      "https://www.youtube.com/watch?v=LIOFdT6TC_w" ]
+                sendVideo config destination day videos
+            | PostAnimation ->
+                sendGif config destination day
+        | PostSaturday ->
+            let day = "Saturday"
+            sendGif config destination day
 
     let parseMailboxMessage (envelop: Envelop) =
         match envelop with

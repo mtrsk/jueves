@@ -26,7 +26,8 @@ module SQLite =
                     Timezone Int NOT NULL,
                     LastMonday DATETIME DEFAULT CURRENT_TIMESTAMP,
                     LastTuesday DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    LastThursday DATETIME DEFAULT CURRENT_TIMESTAMP
+                    LastThursday DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    LastSaturday DATETIME DEFAULT CURRENT_TIMESTAMP
                 );
                 """
             use createTable = new SqliteCommand(createTableCommand, conn)
@@ -44,8 +45,8 @@ module SQLite =
             conn.Open()
             let insertCommand =
                 """
-                INSERT INTO Chat (Id, Timezone, LastMonday, LastTuesday, LastThursday)
-                VALUES (@id, @timezone, @monday, @tuesday, @thursday);
+                INSERT INTO Chat (Id, Timezone, LastMonday, LastTuesday, LastThursday, LastSaturday)
+                VALUES (@id, @timezone, @monday, @tuesday, @thursday, @saturday);
                 """
             use insert = new SqliteCommand(insertCommand, conn)
             let now = DateTimeOffset.UtcNow.AddDays(-7)
@@ -54,6 +55,7 @@ module SQLite =
             insert.Parameters.AddWithValue("@monday", now) |> ignore
             insert.Parameters.AddWithValue("@tuesday", now) |> ignore
             insert.Parameters.AddWithValue("@thursday", now) |> ignore
+            insert.Parameters.AddWithValue("@saturday", now) |> ignore
             let result = insert.ExecuteNonQuery()
             if result >= 1 then
                 ()
@@ -80,7 +82,9 @@ module SQLite =
                 let lastMonday = reader.GetDateTimeOffset(2)
                 let lastTuesday = reader.GetDateTimeOffset(3)
                 let lastThursday = reader.GetDateTimeOffset(4)
-                let last = { Monday = lastMonday; Tuesday = lastTuesday; Thursday = lastThursday }
+                let lastSaturday = reader.GetDateTimeOffset(5)
+                let last =
+                    { Monday = lastMonday; Tuesday = lastTuesday; Thursday = lastThursday; Saturday = lastSaturday }
                 results <- { Id = chatId; TimeZone = timezone; LastUpdates = last } :: results
             results
         with

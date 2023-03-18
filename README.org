@@ -1,0 +1,4 @@
+* Jueves
+It's a stupid Telegram bot.
+
+[[./assets/thursday/jueves_00.gif]]

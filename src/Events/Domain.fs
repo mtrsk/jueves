@@ -3,7 +3,7 @@ namespace Events
 open Funogram.Telegram.Bot
 
 type Command = Register | Message
-type Background = PostMonday | PostTuesday | PostThursday
+type Background = PostMonday | PostTuesday | PostThursday | PostSaturday
 
 type TelegramEvent =
     { Command: Command
@@ -17,3 +17,5 @@ type BackgroundEvent =
 type Envelop =
     | FromTelegram of TelegramEvent
     | FromBackground of BackgroundEvent
+
+type RandomEvent = PostVideo | PostAnimation
