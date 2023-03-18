@@ -11,7 +11,8 @@ module Time =
         date.DayOfWeek = DayOfWeek.Tuesday
 
     let isThursday(date: DateTimeOffset) =
-        date.DayOfWeek = DayOfWeek.Thursday
+        //date.DayOfWeek = DayOfWeek.Thursday
+        true
 
     let toTimespan (hours: int) = TimeSpan(hours, 0, 0)
  

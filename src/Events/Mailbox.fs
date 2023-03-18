@@ -1,6 +1,7 @@
 namespace Events
 
 open System
+open System.IO
 
 open Funogram.Api
 open Funogram.Telegram
@@ -16,6 +17,15 @@ module Mailbox =
     let sendMessage (config: Funogram.Types.BotConfig) chatId message =
         log.Information("Sending MESSAGE={@Message} to CHAT={@Chat}", message, chatId)
         Api.sendMessage chatId message
+        |> api config
+        |> Async.Ignore
+        |> Async.Start
+ 
+    let sendAnimation (config: Funogram.Types.BotConfig) chatId (path: string) =
+        log.Information("Sending IMAGE={@Path} to CHAT={@Chat}", path, chatId)
+        use stream = new FileStream(path, FileMode.Open, FileAccess.Read)
+        let animation = InputFile.File(path, stream)
+        Api.sendAnimation chatId animation ""
         |> api config
         |> Async.Ignore
         |> Async.Start
@@ -45,6 +55,12 @@ module Mailbox =
         |> List.sortBy (fun _ -> rnd.Next())
         |> List.head
 
+    let fetchPicturesFromDirectory (source: string) =
+        let assetPath = __SOURCE_DIRECTORY__ + $"/../../assets/{source}"
+        Directory.GetFiles(assetPath, "*.gif")
+        |> Array.map (Path.GetFullPath)
+        |> List.ofArray
+
     let handleBackgroundTasks config (operation: Background) (destination: Database.Chat) =
         match operation with
         | PostMonday ->
@@ -56,13 +72,23 @@ module Mailbox =
             sendMessage config destination.Id msg
         | PostTuesday -> ()
         | PostThursday ->
-            let videos =
-                [ "https://www.youtube.com/watch?v=R5bQrotNfok"
-                  "https://www.youtube.com/watch?v=YE4IvymZQPY"
-                  "https://www.youtube.com/watch?v=LIOFdT6TC_w" ]
-            let msg = pickRandomItem videos
-            SQLite.update destination "Thursday"
-            sendMessage config destination.Id msg
+            log.Information("It is jueves my dudes...")
+            let day = "Thursday"
+            let event = [ PostPicture; PostVideo; PostPicture ] |> pickRandomItem
+            match event with
+            | PostVideo ->
+                let videos =
+                    [ "https://www.youtube.com/watch?v=R5bQrotNfok"
+                      "https://www.youtube.com/watch?v=YE4IvymZQPY"
+                      "https://www.youtube.com/watch?v=LIOFdT6TC_w" ]
+                let msg = pickRandomItem videos
+                // SQLite.update destination day
+                sendMessage config destination.Id msg
+            | PostPicture ->
+                let pictures = fetchPicturesFromDirectory (day.ToLower())
+                let msg = pickRandomItem pictures
+                // SQLite.update destination day
+                sendAnimation config destination.Id msg
 
     let parseMailboxMessage (envelop: Envelop) =
         match envelop with

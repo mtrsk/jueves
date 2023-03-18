@@ -40,7 +40,7 @@ module Runner =
     let backgroundJob botConfig =
         log.Information("Starting background jobs...")
         let config = botConfig
-        let interval = TimeSpan.FromMinutes(5)
+        let interval = TimeSpan.FromMinutes(1)
         async {
             while true do
                 let chats = Database.SQLite.readAll()

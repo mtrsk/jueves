@@ -17,3 +17,5 @@ type BackgroundEvent =
 type Envelop =
     | FromTelegram of TelegramEvent
     | FromBackground of BackgroundEvent
+
+type RandomEvent = PostVideo | PostPicture
