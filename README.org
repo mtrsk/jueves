@@ -12,4 +12,10 @@ touch .env
 echo "TELEGRAM_ADMIN_USERNAMES=username1,username2" >> .env
 echo "TELEGRAM_BOT_TOKEN=<your-bot-token>" >> .env
 #+END_SRC
+
 * Deploying
+
+#+BEGIN_SRC shell
+cat .env | fly secrets import
+#+END_SRC
+
