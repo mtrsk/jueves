@@ -28,26 +28,31 @@ module Mailbox =
         |> api config
         |> Async.RunSynchronously
         
+        
     let handleCommand (ctx: UpdateContext) (cmd: Command) (chat: Funogram.Telegram.Types.Chat) =
         match cmd with
         | Command.Register ->
-            let timezone = -3
-            let newChat = { Id = chat.Id; TimeZone = timezone; LastUpdates = Updates.init() }
-            let defaultMessage = "Chat successfully registered!"
-            let message =
-                match chat.Title with
-                | Some t ->
-                    if String.IsNullOrWhiteSpace t then
-                        defaultMessage
-                    else
-                        $"Chat '{chat.Title}' successfully registered!"
-                | None -> defaultMessage
-            SQLite.insert newChat
-            let result = sendMessage ctx.Config chat.Id message
-            ()
-        | Command.Message ->
-            let result = sendMessage ctx.Config chat.Id "Got a message"
-            ()
+            let admins = Settings.settings.Telegram.AdminUsernames
+            let canUseBotCommands =
+                chat.Username
+                |> Option.map (fun x -> List.contains (x.ToLower()) admins)
+                |> Option.defaultValue false
+            if canUseBotCommands then
+                let timezone = -3
+                let newChat = { Id = chat.Id; TimeZone = timezone; LastUpdates = Updates.init() }
+                let defaultMessage = "Chat successfully registered!"
+                let message =
+                    match chat.Title with
+                    | Some t ->
+                        if String.IsNullOrWhiteSpace t then
+                            defaultMessage
+                        else
+                            $"Chat '{t}' successfully registered!"
+                    | None -> defaultMessage
+                SQLite.insert newChat
+                let result = sendMessage ctx.Config chat.Id message
+                ()
+        | Command.Message -> ()
 
     let pickRandomItem (data: 'T list) =
         // TODO: This is really dumb, find a better way to do this in F#

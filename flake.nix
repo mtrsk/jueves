@@ -17,7 +17,6 @@
           buildInputs = [
             docker
             dotnet-sdk_6
-            nodejs
             gnumake
             icu
             openssl
