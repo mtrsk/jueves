@@ -456,3 +456,6 @@ $RECYCLE.BIN/
 # Configuration
 *env*
 *.db
+database/*
+!database/.gitkeep
+

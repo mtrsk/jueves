@@ -1,4 +1,21 @@
 * Jueves
+
+#+html:  <a href="https://builtwithnix.org"><img alt="built with nix" src="https://builtwithnix.org/badge.svg" /></a>
+
 It's a stupid Telegram bot.
 
 [[./assets/thursday/jueves_00.gif]]
+
+* Developing
+#+BEGIN_SRC shell
+touch .env
+echo "TELEGRAM_ADMIN_USERNAMES=username1,username2" >> .env
+echo "TELEGRAM_BOT_TOKEN=<your-bot-token>" >> .env
+#+END_SRC
+
+* Deploying
+
+#+BEGIN_SRC shell
+cat .env | fly secrets import
+#+END_SRC
+

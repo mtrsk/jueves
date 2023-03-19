@@ -5,11 +5,14 @@ open Serilog
 open Serilog.Core
 open Serilog.Sinks.SystemConsole.Themes
 
+type TelegramUsername = string
 type TelegramToken = string
 
 [<Convention("TELEGRAM")>]
 type TelegramSettings =
-    { BotToken: TelegramToken }
+    { BotToken: TelegramToken
+      [<ListSeparator(',')>]
+      AdminUsernames: TelegramUsername list }
 
 type ApplicationSettings =
     { Telegram: TelegramSettings; Logger: Logger }

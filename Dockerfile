@@ -13,6 +13,7 @@ RUN apt-get update \
 WORKDIR /app
 COPY ./src /app/src
 COPY jueves.sln bootstrap.sh ./
+RUN mkdir database
 
 RUN chmod 700 bootstrap.sh
 RUN ./bootstrap.sh
@@ -34,4 +35,8 @@ RUN apt-get update \
 
 COPY --from=publish /app/publish /app
 WORKDIR /app
-ENTRYPOINT [ "dotnet App.dll" ]
+RUN mkdir database
+COPY ./assets ./assets
+COPY ./docker_entrypoint.sh .
+RUN chmod 700 ./docker_entrypoint.sh
+ENTRYPOINT [ "/app/docker_entrypoint.sh" ]

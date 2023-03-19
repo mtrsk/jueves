@@ -1,0 +1,21 @@
+# fly.toml file generated for jueves on 2023-03-19T18:17:19-03:00
+
+app = "jueves"
+kill_signal = "SIGINT"
+kill_timeout = 5
+primary_region = "gru"
+processes = []
+
+[build]
+  build-target = "runtime"
+  dockerfile = "Dockerfile"
+
+[experimental]
+  auto_rollback = true
+  allowed_public_ports = []
+  #entrypoint = ["worker"]
+
+[mount]
+  destination = "/app/database"
+  source = "jueves_data"
+

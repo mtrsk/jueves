@@ -24,7 +24,7 @@ build:
 	dotnet run --project src/App/App.fsproj
 
 docker:
-	docker-compose build
+	docker-compose build --progress=plain
 
 run:
 	docker compose up
