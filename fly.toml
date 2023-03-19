@@ -1,4 +1,4 @@
-# fly.toml file generated for jueves on 2023-03-18T15:26:39-03:00
+# fly.toml file generated for jueves on 2023-03-19T18:17:19-03:00
 
 app = "jueves"
 kill_signal = "SIGINT"
@@ -7,30 +7,15 @@ primary_region = "gru"
 processes = []
 
 [build]
-  dockerfile = "Dockerfile"
   build-target = "runtime"
-
-[mount]
-  source = "jueves_data"
-  destination = "/app/database"
-
-[env]
+  dockerfile = "Dockerfile"
 
 [experimental]
   auto_rollback = true
+  allowed_public_ports = []
+  #entrypoint = ["worker"]
 
-[[services]]
-  http_checks = []
-  processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
-
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
+[mount]
+  destination = "/app/database"
+  source = "jueves_data"
 
